@@ -25,6 +25,7 @@ love .
 ## Libraries
 
 - [middleclass](https://github.com/kikito/middleclass) v4.1.1
+- [windfield](https://github.com/adnzzzzZ/windfield) commit [830c6f9](https://github.com/adnzzzzZ/windfield/tree/830c6f9c357f31f5c0e53d5721e6dc0d0ccebae1)  on 7 Apr 2018 (customized)
 
 ## License
 
