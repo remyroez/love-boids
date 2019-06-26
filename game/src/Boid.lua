@@ -23,7 +23,7 @@ function Boid:initialize(t)
     self.radius = t.radius or 1
     self.world = t.world or {}
 
-    self.separation = 1
+    self.separation = 0.5
     self.alignment = 0.5
     self.cohesion = 1
 
@@ -84,7 +84,14 @@ end
 function Boid:calcSeparation(neighborhoods)
     local x, y = 0, 0
 
-    return x, y
+    for _, neighborhood in ipairs(neighborhoods) do
+        local nx, ny = lume.vector(lume.angle(self.x, self.y, neighborhood.x, neighborhood.y), 1)
+        x, y = x + nx, y + ny
+    end
+
+    local dist = lume.distance(x, y, 0, 0)
+
+    return -x / dist, -y / dist
 end
 
 -- 整列
@@ -93,8 +100,7 @@ function Boid:calcAlignment(neighborhoods)
 
     for _, neighborhood in ipairs(neighborhoods) do
         local nx, ny = lume.vector(neighborhood.rotation, 1)
-        x = x + nx
-        y = y + ny
+        x, y = x + nx, y + ny
     end
 
     local dist = lume.distance(x, y, 0, 0)
