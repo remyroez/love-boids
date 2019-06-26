@@ -27,6 +27,8 @@ function Game:load(...)
 
     -- ワールド
     self.world = wf.newWorld()
+    self.world:addCollisionClass('Wall')
+    self.world:addCollisionClass('Boid')
 
     -- 壁の配置
     self.walls = {}
@@ -36,11 +38,12 @@ function Game:load(...)
     table.insert(self.walls, self.world:newRectangleCollider(self.width, -8, 8, self.height + 16))
     for _, wall in ipairs(self.walls) do
         wall:setType('static')
+        wall:setCollisionClass('Wall')
     end
 
     -- テスト
     for i = 1, 100 do
-        self.entityManager:add(
+        local entity = self.entityManager:add(
             Boid {
                 x = 8 + love.math.random(self.width - 16),
                 y = 8 + love.math.random(self.height - 16),
@@ -49,6 +52,7 @@ function Game:load(...)
                 world = self.world
             }
         )
+        entity.collider:setCollisionClass('Boid')
     end
 end
 
