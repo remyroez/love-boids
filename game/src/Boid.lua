@@ -25,7 +25,7 @@ function Boid:initialize(t)
 
     self.separation = 0.5
     self.alignment = 0.5
-    self.cohesion = 1
+    self.cohesion = 0.5
 
     -- Transform 初期化
     self:initializeTransform(t.x, t.y, t.rotation)
@@ -112,7 +112,13 @@ end
 function Boid:calcCohesion(neighborhoods)
     local x, y = 0, 0
 
-    return x, y
+    for _, neighborhood in ipairs(neighborhoods) do
+        x, y = x + neighborhood.x, y + neighborhood.y
+    end
+
+    x, y = x / #neighborhoods, y / #neighborhoods
+
+    return lume.vector(lume.angle(self.x, self.y, x, y), 1)
 end
 
 -- 描画
