@@ -18,7 +18,8 @@ function Boid:initialize(t)
     Entity.initialize(self)
 
     -- プロパティ
-    self.radius = t.radius or 16
+    self.speed = t.speed or 100
+    self.radius = t.radius or 1
     self.world = t.world or {}
 
     -- Transform 初期化
@@ -34,6 +35,12 @@ end
 
 -- 更新
 function Boid:update(dt)
+    -- コライダーの位置を取得して適用
+    self:applyPositionFromCollider()
+
+    -- 前進
+    local x, y = lume.vector(self.rotation, 1)
+    self:setColliderVelocity(x, y, self.speed)
 end
 
 -- 描画
