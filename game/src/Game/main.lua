@@ -41,6 +41,13 @@ function Game:load(...)
         wall:setCollisionClass('Wall')
     end
 
+    -- ルール
+    self.rule = {
+        separation = 0.5,
+        alignment = 0.5,
+        cohesion = 0.5,
+    }
+
     -- テスト
     for i = 1, 100 do
         local entity = self.entityManager:add(
@@ -49,7 +56,8 @@ function Game:load(...)
                 y = 8 + love.math.random(self.height - 16),
                 rotation = love.math.random() * math.pi * 2,
                 radius = 8,
-                world = self.world
+                world = self.world,
+                rule = self.rule,
             }
         )
         entity.collider:setCollisionClass('Boid')

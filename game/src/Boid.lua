@@ -23,9 +23,10 @@ function Boid:initialize(t)
     self.radius = t.radius or 1
     self.world = t.world or {}
 
-    self.separation = 0.5
-    self.alignment = 0.5
-    self.cohesion = 0.5
+    self.rule = t.rule or {}
+    self.rule.separation = self.rule.separation or 0.5
+    self.rule.alignment = self.rule.alignment or 0.5
+    self.rule.cohesion = self.rule.cohesion or 0.5
 
     -- Transform 初期化
     self:initializeTransform(t.x, t.y, t.rotation)
@@ -53,26 +54,30 @@ function Boid:update(dt)
     local neighborhoods = {}
     local colliders = self.world:queryCircleArea(self.x, self.y, self.view, { 'Boid' })
     for _, collider in ipairs(colliders) do
-        table.insert(neighborhoods, collider:getObject())
+        if collider == self.collider then
+            -- 自分は除く
+        else
+            table.insert(neighborhoods, collider:getObject())
+        end
     end
 
     -- ボイドがいれば、向きを変える
     if #neighborhoods > 0 then
         local x, y = lume.vector(self.rotation, 1)
         do
+            local s = self.rule.separation
             local lx, ly = self:calcSeparation(neighborhoods)
-            x = x + lx * self.separation
-            y = y + ly * self.separation
+            x, y = x + lx * s, y + ly * s
         end
         do
+            local s = self.rule.alignment
             local lx, ly = self:calcAlignment(neighborhoods)
-            x = x + lx * self.alignment
-            y = y + ly * self.alignment
+            x, y = x + lx * s, y + ly * s
         end
         do
+            local s = self.rule.cohesion
             local lx, ly = self:calcCohesion(neighborhoods)
-            x = x + lx * self.cohesion
-            y = y + ly * self.cohesion
+            x, y = x + lx * s, y + ly * s
         end
         if self.x ~= 0 or self.y ~= 0 then
             self.rotation = lume.angle(self.x, self.y, self.x + x, self.y + y)
