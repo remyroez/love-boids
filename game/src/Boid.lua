@@ -10,6 +10,10 @@ local Boid = class('Boid', Entity)
 Boid:include(require 'Transform')
 Boid:include(require 'Collider')
 
+local function isNaN(n)
+    return type(n) == 'number' and (n ~= n)
+end
+
 -- 初期化
 function Boid:initialize(t)
     t = t or {}
@@ -51,19 +55,24 @@ function Boid:update(dt)
     end
 
     -- 周囲のボイドを取得
-    local neighborhoods = {}
-    local colliders = self.world:queryCircleArea(self.x, self.y, self.view, { 'Boid' })
-    for _, collider in ipairs(colliders) do
-        if collider == self.collider then
-            -- 自分は除く
-        else
-            table.insert(neighborhoods, collider:getObject())
-        end
-    end
+    local neighborhoods = self:getNeighborhoods()
 
-    -- ボイドがいれば、向きを変える
-    if #neighborhoods > 0 then
+    -- 周囲の壁を取得
+    local walls = self:getWalls()
+
+    -- 壁かボイドがいれば、向きを変える
+    if (#neighborhoods + #walls) > 0 then
         local x, y = lume.vector(self.rotation, 1)
+        do
+            local s = 1--self.rule.separation
+            local lx, ly = self:calcSeparation(walls)
+            if isNaN(lx) or isNaN(ly) then
+                -- TODO: NaN の原因を探す
+                --print('calcSeparation walls', lx, ly)
+            else
+                x, y = x + lx * s, y + ly * s
+            end
+        end
         do
             local s = self.rule.separation
             local lx, ly = self:calcSeparation(neighborhoods)
@@ -79,10 +88,62 @@ function Boid:update(dt)
             local lx, ly = self:calcCohesion(neighborhoods)
             x, y = x + lx * s, y + ly * s
         end
-        if self.x ~= 0 or self.y ~= 0 then
+        if isNaN(x) or isNaN(y) then
+            -- 数値が NaN になったらスキップ
+        elseif x ~= 0 or y ~= 0 then
+
             self.rotation = lume.angle(self.x, self.y, self.x + x, self.y + y)
         end
     end
+end
+
+-- 近くのボイドを探す
+function Boid:getNeighborhoods()
+    local neighborhoods = {}
+    local colliders = self.world:queryCircleArea(self.x, self.y, self.view, { 'Boid' })
+    for _, collider in ipairs(colliders) do
+        if collider == self.collider then
+            -- 自分は除く
+        else
+            table.insert(neighborhoods, collider:getObject())
+        end
+    end
+    return neighborhoods
+end
+
+-- 近くの壁を探す
+function Boid:getWalls()
+    local walls = {}
+
+    -- コールバック
+    local callback = function (fixture, x, y, xn, yn, fraction)
+        if not fixture:isSensor() then
+            local collider = fixture:getUserData()
+            if collider and collider.collision_class == 'Wall' then
+                table.insert(walls, { x = x, y = y, collider = fixture:getUserData() })
+            end
+        end
+        return 1
+    end
+
+    -- 近傍
+    local neighborhoods = {
+        {  1,  0 },
+        {  0,  1 },
+        {  1,  1 },
+        {  1, -1 },
+        { -1,  0 },
+        {  0, -1 },
+        {  1, -1 },
+        { -1, -1 },
+    }
+
+    -- レイキャスト
+    for _, n in ipairs(neighborhoods) do
+        self.world:rayCast(self.x, self.y, self.x + self.view * n[1], self.y + self.view * n[2], callback)
+    end
+
+    return walls
 end
 
 -- 分離

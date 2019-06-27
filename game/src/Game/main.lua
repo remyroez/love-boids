@@ -43,12 +43,12 @@ function Game:load(...)
 
     -- ルール
     self.rule = {
-        separation = 0.5,
-        alignment = 0.5,
-        cohesion = 0.5,
+        separation = 0.28,
+        alignment = 0.25,
+        cohesion = 0.25,
     }
 
-    -- テスト
+    -- ボイド配置
     for i = 1, 100 do
         local entity = self.entityManager:add(
             Boid {
