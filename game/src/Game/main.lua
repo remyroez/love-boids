@@ -15,6 +15,7 @@ local Boid = require 'Boid'
 -- 初期化
 function Game:initialize(...)
     Application.initialize(self, ...)
+    self:initializeDebug(...)
 end
 
 -- 読み込み
@@ -62,6 +63,9 @@ function Game:load(...)
         )
         entity.collider:setCollisionClass('Boid')
     end
+
+    -- デバッグロード
+    self:loadDebug(...)
 end
 
 -- 更新
@@ -71,6 +75,11 @@ function Game:update(dt, ...)
 
     -- エンティティ更新
     self.entityManager:update(dt)
+
+    -- デバッグ更新
+    if self.debugMode then
+        self:updateDebug(dt)
+    end
 end
 
 -- 描画
@@ -79,8 +88,11 @@ function Game:draw(...)
     self.entityManager:draw()
 
     -- ワールド描画
+    self.world:draw()
+
+    -- デバッグ描画
     if self.debugMode then
-        self.world:draw()
+        self:drawDebug()
     end
 end
 
