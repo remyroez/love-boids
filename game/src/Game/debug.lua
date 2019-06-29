@@ -74,18 +74,7 @@ function Game:ruleWindow()
     )
     spacer(300)
 
-    if input(self.rule, 'separation', 'Separation') then
-        self.rule.separation = math.max(0, math.min(self.rule.separation, 1))
-    end
-    if input(self.rule, 'alignment', 'Alignment') then
-        self.rule.alignment = math.max(0, math.min(self.rule.alignment, 1))
-    end
-    if input(self.rule, 'cohesion', 'Cohesion') then
-        self.rule.cohesion = math.max(0, math.min(self.rule.cohesion, 1))
-    end
-
-    Slab.Separator()
-
+    -- 新規
     if Slab.Button('New') then
         Slab.OpenDialog('New')
         self.new = {
@@ -94,6 +83,24 @@ function Game:ruleWindow()
             fieldHeight = self.fieldHeight,
         }
         self.pause = true
+    end
+    Slab.SameLine()
+
+    -- ポーズ
+    if Slab.Button(self.pause and 'Play' or 'Stop') then
+        self.pause = not self.pause
+    end
+
+    Slab.Separator()
+
+    if input(self.rule, 'separation', 'Separation') then
+        self.rule.separation = math.max(0, math.min(self.rule.separation, 1))
+    end
+    if input(self.rule, 'alignment', 'Alignment') then
+        self.rule.alignment = math.max(0, math.min(self.rule.alignment, 1))
+    end
+    if input(self.rule, 'cohesion', 'Cohesion') then
+        self.rule.cohesion = math.max(0, math.min(self.rule.cohesion, 1))
     end
 
     Slab.EndWindow()
