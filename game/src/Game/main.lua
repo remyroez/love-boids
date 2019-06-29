@@ -33,14 +33,8 @@ function Game:load(...)
 
     -- 壁の配置
     self.walls = {}
-    table.insert(self.walls, self.world:newRectangleCollider(-8, -8, self.width + 16, 8))
-    table.insert(self.walls, self.world:newRectangleCollider(-8, self.height, self.width + 16, 8))
-    table.insert(self.walls, self.world:newRectangleCollider(-8, -8, 8, self.height + 16))
-    table.insert(self.walls, self.world:newRectangleCollider(self.width, -8, 8, self.height + 16))
-    for _, wall in ipairs(self.walls) do
-        wall:setType('static')
-        wall:setCollisionClass('Wall')
-    end
+    self.fieldWidth, self.fieldHeight = 0, 0
+    self:resetWall()
 
     -- ルール
     self.rule = {
@@ -50,19 +44,8 @@ function Game:load(...)
     }
 
     -- ボイド配置
-    for i = 1, 100 do
-        local entity = self.entityManager:add(
-            Boid {
-                x = 8 + love.math.random(self.width - 16),
-                y = 8 + love.math.random(self.height - 16),
-                rotation = love.math.random() * math.pi * 2,
-                radius = 8,
-                world = self.world,
-                rule = self.rule,
-            }
-        )
-        entity.collider:setCollisionClass('Boid')
-    end
+    self.numBoids = 0
+    self:resetBoids(100)
 
     -- 移動モード
     self.move = false
@@ -73,20 +56,27 @@ function Game:load(...)
     -- フォーカス
     self.focus = false
 
+    -- ポーズ
+    self.pause = false
+
     -- デバッグロード
     self:loadDebug(...)
 end
 
 -- 更新
 function Game:update(dt, ...)
-    -- ワールド更新
-    self.world:update(dt)
+    if self.pause then
+        -- ポーズ中
+    else
+        -- ワールド更新
+        self.world:update(dt)
 
-    -- エンティティ更新
-    self.entityManager:update(dt)
+        -- エンティティ更新
+        self.entityManager:update(dt)
 
-    -- マウス操作
-    self:mouseControl()
+        -- マウス操作
+        self:mouseControl()
+    end
 
     -- デバッグ更新
     if self.debugMode then
@@ -145,6 +135,54 @@ end
 -- リサイズ
 function Game:resize(width, height)
     self.width, self.height = width, height
+end
+
+-- ボイドの配置
+function Game:resetBoids(num)
+    num = num or 100
+
+    -- エンティティクリア
+    self.entityManager:clear()
+
+    -- ボイド生成
+    for i = 1, num do
+        local entity = self.entityManager:add(
+            Boid {
+                x = 8 + love.math.random(self.fieldWidth - 16),
+                y = 8 + love.math.random(self.fieldHeight - 16),
+                rotation = love.math.random() * math.pi * 2,
+                radius = 8,
+                world = self.world,
+                rule = self.rule,
+            }
+        )
+        entity.collider:setCollisionClass('Boid')
+    end
+
+    self.numBoids = num
+end
+
+-- 壁のリセット
+function Game:resetWall(width, height)
+    width, height = width or self.width, height or self.height
+
+    -- 既存の壁の破棄
+    for _, wall in ipairs(self.walls) do
+        wall:destroy()
+    end
+
+    -- 壁の作成
+    self.walls = {}
+    table.insert(self.walls, self.world:newRectangleCollider(-8, -8, width + 16, 8))
+    table.insert(self.walls, self.world:newRectangleCollider(-8, height, width + 16, 8))
+    table.insert(self.walls, self.world:newRectangleCollider(-8, -8, 8, height + 16))
+    table.insert(self.walls, self.world:newRectangleCollider(width, -8, 8, height + 16))
+    for _, wall in ipairs(self.walls) do
+        wall:setType('static')
+        wall:setCollisionClass('Wall')
+    end
+
+    self.fieldWidth, self.fieldHeight = width, height
 end
 
 -- マウス操作

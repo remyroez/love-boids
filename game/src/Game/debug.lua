@@ -49,6 +49,9 @@ function Game:updateDebug(dt, ...)
     -- Slab 更新
     Slab.Update(dt)
 
+    -- 新規ダイアログ
+    self:newDialog()
+
     -- ルールウィンドウ
     self:ruleWindow()
 
@@ -62,7 +65,6 @@ end
 
 -- ルールウィンドウ
 function Game:ruleWindow()
-
     Slab.BeginWindow(
         'Rule',
         {
@@ -82,5 +84,44 @@ function Game:ruleWindow()
         self.rule.cohesion = math.max(0, math.min(self.rule.cohesion, 1))
     end
 
+    Slab.Separator()
+
+    if Slab.Button('New') then
+        Slab.OpenDialog('New')
+        self.new = {
+            numBoids = self.numBoids,
+            fieldWidth = self.fieldWidth,
+            fieldHeight = self.fieldHeight,
+        }
+    end
+
     Slab.EndWindow()
+end
+
+-- 新規ダイアログ
+function Game:newDialog()
+    if Slab.BeginDialog('New', { Title = 'New', Columns = 2, }) then
+        spacer(300)
+
+        input(self.new, 'numBoids', 'Boids')
+        input(self.new, 'fieldWidth', 'Width')
+        input(self.new, 'fieldHeight', 'Height')
+
+        Slab.Separator()
+
+        -- 開くボタン
+        if Slab.Button('New', { AlignRight = true }) then
+            self:resetWall(self.new.fieldWidth, self.new.fieldHeight)
+            self:resetBoids(self.new.numBoids)
+            Slab.CloseDialog()
+        end
+
+        -- キャンセルボタン
+        Slab.SameLine()
+        if Slab.Button('Cancel', { AlignRight = true }) then
+            Slab.CloseDialog()
+        end
+
+        Slab.EndDialog()
+    end
 end

@@ -41,6 +41,7 @@ end
 
 -- 破棄
 function Boid:destroy()
+    self:destroyCollider()
 end
 
 -- 更新
