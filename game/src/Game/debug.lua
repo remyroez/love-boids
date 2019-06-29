@@ -46,9 +46,13 @@ end
 
 -- 更新
 function Game:updateDebug(dt, ...)
+    -- Slab 更新
     Slab.Update(dt)
 
+    -- ルールウィンドウ
     self:ruleWindow()
+
+    self.focus = Slab.IsVoidHovered()
 end
 
 -- 描画

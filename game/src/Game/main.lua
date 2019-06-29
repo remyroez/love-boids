@@ -64,6 +64,15 @@ function Game:load(...)
         entity.collider:setCollisionClass('Boid')
     end
 
+    -- 移動モード
+    self.move = false
+    self.moveOrigin = { x = 0, y = 0 }
+    self.offsetOrigin = { x = 0, y = 0 }
+    self.offset = { x = 0, y = 0 }
+
+    -- フォーカス
+    self.focus = false
+
     -- デバッグロード
     self:loadDebug(...)
 end
@@ -76,6 +85,9 @@ function Game:update(dt, ...)
     -- エンティティ更新
     self.entityManager:update(dt)
 
+    -- マウス操作
+    self:mouseControl()
+
     -- デバッグ更新
     if self.debugMode then
         self:updateDebug(dt)
@@ -84,11 +96,17 @@ end
 
 -- 描画
 function Game:draw(...)
-    -- エンティティ描画
-    self.entityManager:draw()
+    love.graphics.push()
+    do
+        love.graphics.translate(self.offset.x, self.offset.y)
 
-    -- ワールド描画
-    self.world:draw()
+        -- エンティティ描画
+        self.entityManager:draw()
+
+        -- ワールド描画
+        self.world:draw()
+    end
+    love.graphics.pop()
 
     -- デバッグ描画
     if self.debugMode then
@@ -126,4 +144,35 @@ end
 
 -- リサイズ
 function Game:resize(width, height)
+    self.width, self.height = width, height
+end
+
+-- マウス操作
+function Game:mouseControl()
+    if not self.focus then
+        -- マウスカーソルがＧＵＩに乗っている
+    elseif love.mouse.isDown(1) then
+        -- クリック
+        if not self.move then
+            -- 移動モード開始
+            self.move = true
+            self.moveOrigin.x, self.moveOrigin.y = love.mouse.getPosition()
+            self.offsetOrigin.x, self.offsetOrigin.y = self.offset.x, self.offset.y
+        else
+            -- 移動中
+            local x, y = love.mouse.getPosition()
+            self:setOffset(self.offsetOrigin.x + x - self.moveOrigin.x, self.offsetOrigin.y + y - self.moveOrigin.y)
+        end
+    else
+        if self.move then
+            -- 移動モード終了
+            self.move = false
+        end
+    end
+end
+
+-- オフセットの設定
+function Game:setOffset(x, y)
+    self.offset.x = x
+    self.offset.y = y
 end
