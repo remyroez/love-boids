@@ -52,6 +52,7 @@ function Game:load(...)
     self.moveOrigin = { x = 0, y = 0 }
     self.offsetOrigin = { x = 0, y = 0 }
     self.offset = { x = 0, y = 0 }
+    self:setOffset()
 
     -- フォーカス
     self.focus = false
@@ -136,6 +137,7 @@ end
 -- リサイズ
 function Game:resize(width, height)
     self.width, self.height = width, height
+    self:setOffset()
 end
 
 -- ボイドの配置
@@ -155,6 +157,9 @@ function Game:resetBoids(num)
                 radius = 8,
                 world = self.world,
                 rule = self.rule,
+                isCull = function (boid, x, y)
+                    return not self:isView(x - boid.radius, y - boid.radius, x + boid.radius, y + boid.radius)
+                end
             }
         )
         entity.collider:setCollisionClass('Boid')
@@ -212,6 +217,31 @@ end
 
 -- オフセットの設定
 function Game:setOffset(x, y)
-    self.offset.x = x
-    self.offset.y = y
+    self.offset.x = x or self.offset.x
+    self.offset.y = y or self.offset.y
+    self:setViewport(-self.offset.x, -self.offset.y, self.width, self.height)
+end
+
+-- 表示領域
+function Game:setViewport(x, y, w, h)
+    local sw, sh = love.graphics.getDimensions()
+
+    self.viewport = self.viewport or {}
+    self.viewport.left = x or 0
+    self.viewport.top = y or 0
+    self.viewport.right = self.viewport.left + (w or sw)
+    self.viewport.bottom = self.viewport.top + (h or sh)
+end
+
+-- 指定した矩形が表示できるかどうか
+function Game:isView(left, top, right, bottom)
+    local left = left or 0
+    local top = top or 0
+    local right = right or left
+    local bottom = bottom or top
+
+    return (right > self.viewport.left)
+        and (bottom > self.viewport.top)
+        and (left < self.viewport.right)
+        and (top < self.viewport.bottom)
 end
