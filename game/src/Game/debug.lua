@@ -93,6 +93,7 @@ function Game:ruleWindow()
             fieldWidth = self.fieldWidth,
             fieldHeight = self.fieldHeight,
         }
+        self.pause = true
     end
 
     Slab.EndWindow()
@@ -113,12 +114,14 @@ function Game:newDialog()
         if Slab.Button('New', { AlignRight = true }) then
             self:resetWall(self.new.fieldWidth, self.new.fieldHeight)
             self:resetBoids(self.new.numBoids)
+            self.pause = false
             Slab.CloseDialog()
         end
 
         -- キャンセルボタン
         Slab.SameLine()
         if Slab.Button('Cancel', { AlignRight = true }) then
+            self.pause = false
             Slab.CloseDialog()
         end
 

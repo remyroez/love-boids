@@ -94,7 +94,8 @@ function Game:draw(...)
         self.entityManager:draw()
 
         -- ワールド描画
-        self.world:draw()
+        --self.world:draw()
+        love.graphics.rectangle('line', 0, 0, self.fieldWidth, self.fieldHeight)
     end
     love.graphics.pop()
 

@@ -190,6 +190,7 @@ end
 
 -- 描画
 function Boid:draw()
+    love.graphics.circle('line', self.x, self.y, self.radius, 4)
 end
 
 return Boid
