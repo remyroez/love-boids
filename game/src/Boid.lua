@@ -26,6 +26,7 @@ function Boid:initialize(t)
     self.speed = t.speed or 100
     self.radius = t.radius or 1
     self.world = t.world or {}
+    self.isCull = t.isCull or function (boid, x, y) return false end
 
     self.rule = t.rule or {}
     self.rule.separation = self.rule.separation or 0.5
@@ -41,6 +42,7 @@ end
 
 -- 破棄
 function Boid:destroy()
+    self:destroyCollider()
 end
 
 -- 更新
@@ -189,6 +191,11 @@ end
 
 -- 描画
 function Boid:draw()
+    if self.isCull(self, self.x, self.y) then
+        -- カリング
+    else
+        love.graphics.circle('line', self.x, self.y, self.radius, 4)
+    end
 end
 
 return Boid
